@@ -921,7 +921,6 @@ class _AddTransactionPage extends StatefulWidget {
 class _AddTransactionPageState extends State<_AddTransactionPage> {
   late final TransactionDraft _draft;
   late final TextEditingController _amountController;
-  late final FocusNode _amountFocusNode;
   String? _amountError;
 
   @override
@@ -929,18 +928,11 @@ class _AddTransactionPageState extends State<_AddTransactionPage> {
     super.initState();
     _draft = TransactionDraft();
     _amountController = TextEditingController();
-    _amountFocusNode = FocusNode();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _amountFocusNode.requestFocus();
-      }
-    });
   }
 
   @override
   void dispose() {
     _amountController.dispose();
-    _amountFocusNode.dispose();
     super.dispose();
   }
 
@@ -995,6 +987,7 @@ class _AddTransactionPageState extends State<_AddTransactionPage> {
         : Colors.lightGreen.withValues(alpha: 0.2);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         leading: IconButton(
           tooltip: 'Back',
@@ -1012,149 +1005,139 @@ class _AddTransactionPageState extends State<_AddTransactionPage> {
       body: Semantics(
         container: true,
         label: 'Add transaction form',
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: _amountFocusNode.unfocus,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(20, 12, 20, bottomInset + 16),
-            child: SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextField(
-                    controller: _amountController,
-                    focusNode: _amountFocusNode,
-                    autofocus: false,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(20, 12, 20, bottomInset + 16),
+          child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SegmentedButton<TransactionType>(
+                  segments: const [
+                    ButtonSegment(
+                      value: TransactionType.expense,
+                      label: Text('Expense'),
+                      icon: Icon(Icons.arrow_upward),
                     ),
-                    textInputAction: TextInputAction.done,
-                    decoration: InputDecoration(
-                      labelText: 'Amount',
-                      hintText: '0.00',
-                      prefixText: r'$ ',
-                      errorText: _amountError,
-                      border: const OutlineInputBorder(),
+                    ButtonSegment(
+                      value: TransactionType.income,
+                      label: Text('Income'),
+                      icon: Icon(Icons.arrow_downward),
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        _draft.amountText = value;
-                        _amountError = null;
-                      });
-                    },
-                    onSubmitted: (_) {
-                      if (amountIsValid) {
-                        _save();
-                      }
-                    },
+                  ],
+                  selected: {_draft.type},
+                  onSelectionChanged: (selection) {
+                    setState(() => _draft.type = selection.first);
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _amountController,
+                  onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
+                  autofocus: true,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
-                  const SizedBox(height: 16),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: typeColor,
-                      borderRadius: BorderRadius.circular(100)
-                    ),
-                    child: SegmentedButton<TransactionType>(
-                      segments: const [
-                        ButtonSegment(
-                          value: TransactionType.expense,
-                          label: Text('Expense'),
-                          icon: Icon(Icons.arrow_upward),
-                        ),
-                        ButtonSegment(
-                          value: TransactionType.income,
-                          label: Text('Income'),
-                          icon: Icon(Icons.arrow_downward),
-                        ),
-                      ],
-                      selected: {_draft.type},
-                      onSelectionChanged: (selection) {
-                        setState(() => _draft.type = selection.first);
-                      },
-                    ),
+                  textInputAction: TextInputAction.done,
+                  decoration: InputDecoration(
+                    labelText: 'Amount',
+                    hintText: '0.00',
+                    prefixText: r'$ ',
+                    errorText: _amountError,
+                    border: const OutlineInputBorder(),
                   ),
-                  const SizedBox(height: 16),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(
-                      _draft.category?.icon ?? Icons.category_outlined,
-                      color: _draft.category?.color,
-                    ),
-                    title: Text(
-                      _draft.category?.label ?? 'Select Category',
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () async {
-                      final category = await Navigator.of(context)
-                          .push<TransactionCategory>(
-                            MaterialPageRoute(
-                              builder: (context) => _CategorySelectionPage(
-                                selectedCategory: _draft.category,
-                              ),
+                  onChanged: (value) {
+                    setState(() {
+                      _draft.amountText = value;
+                      _amountError = null;
+                    });
+                  },
+                  onSubmitted: (_) {
+                    if (amountIsValid) {
+                      _save();
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    _draft.category?.icon ?? Icons.category_outlined,
+                    color: _draft.category?.color,
+                  ),
+                  title: Text(
+                    _draft.category?.label ?? 'Select Category',
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () async {
+                    final category = await Navigator.of(context)
+                        .push<TransactionCategory>(
+                          MaterialPageRoute(
+                            builder: (context) => _CategorySelectionPage(
+                              selectedCategory: _draft.category,
                             ),
-                          );
-                      if (mounted && category != null) {
-                        setState(() => _draft.category = category);
-                      }
+                          ),
+                        );
+                    if (mounted && category != null) {
+                      setState(() => _draft.category = category);
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.event_outlined),
+                  title: const Text('Date and time'),
+                  subtitle: Text(_formatDraftDateTime(_draft.createdAt)),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _selectDateTime,
+                ),
+                const Divider(),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('More Details'),
+                  subtitle: Text(
+                    _draft.eventContext == null ||
+                            _draft.eventContext == 'No event'
+                        ? 'Add an event or campaign'
+                        : _draft.eventContext!,
+                  ),
+                  trailing: Icon(
+                    _draft.isMoreDetailsExpanded
+                        ? Icons.expand_less
+                        : Icons.expand_more,
+                  ),
+                  onTap: () {
+                    setState(() {
+                      _draft.isMoreDetailsExpanded =
+                          !_draft.isMoreDetailsExpanded;
+                    });
+                  },
+                ),
+                if (_draft.isMoreDetailsExpanded)
+                  DropdownButtonFormField<String>(
+                    initialValue:
+                        _draft.eventContext ?? transactionEvents.first,
+                    decoration: const InputDecoration(
+                      labelText: 'Event or campaign',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: [
+                      for (final event in transactionEvents)
+                        DropdownMenuItem(value: event, child: Text(event)),
+                    ],
+                    onChanged: (event) {
+                      setState(() => _draft.eventContext = event);
                     },
                   ),
-                  const SizedBox(height: 16),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.event_outlined),
-                    title: const Text('Date and time'),
-                    subtitle: Text(_formatDraftDateTime(_draft.createdAt)),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: _selectDateTime,
-                  ),
-                  const Divider(),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('More Details'),
-                    subtitle: Text(
-                      _draft.eventContext == null ||
-                              _draft.eventContext == 'No event'
-                          ? 'Add an event or campaign'
-                          : _draft.eventContext!,
-                    ),
-                    trailing: Icon(
-                      _draft.isMoreDetailsExpanded
-                          ? Icons.expand_less
-                          : Icons.expand_more,
-                    ),
-                    onTap: () {
-                      setState(() {
-                        _draft.isMoreDetailsExpanded =
-                            !_draft.isMoreDetailsExpanded;
-                      });
-                    },
-                  ),
-                  if (_draft.isMoreDetailsExpanded)
-                    DropdownButtonFormField<String>(
-                      initialValue:
-                          _draft.eventContext ?? transactionEvents.first,
-                      decoration: const InputDecoration(
-                        labelText: 'Event or campaign',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: [
-                        for (final event in transactionEvents)
-                          DropdownMenuItem(value: event, child: Text(event)),
-                      ],
-                      onChanged: (event) {
-                        setState(() => _draft.eventContext = event);
-                      },
-                    ),
-                  const SizedBox(height: 20),
-                  FilledButton.icon(
-                    onPressed: amountIsValid ? _save : null,
-                    icon: const Icon(Icons.check),
-                    label: const Text('Save'),
-                  ),
-                ],
-              ),
+                const SizedBox(height: 20),
+                FilledButton.icon(
+                  onPressed: amountIsValid ? _save : null,
+                  icon: const Icon(Icons.check),
+                  label: const Text('Save'),
+                ),
+              ],
             ),
           ),
         ),
