@@ -5,7 +5,7 @@ Sync Impact Report
   Responsive Design; Minimal Dependencies; No Automated Testing
 - Added sections: Technology Constraints; Development Workflow
 - Removed sections: none
-- Follow-up TODOs: RATIFICATION_DATE is unknown and requires confirmation.
+- Follow-up TODOs: none.
 -->
 
 # money_logger Constitution
@@ -78,4 +78,4 @@ implementation review MUST check compliance with this constitution. Exceptions M
 be explicitly documented in the change description and approved by the project
 owner; temporary exceptions MUST include an expiration or replacement plan.
 
-**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE): confirm original adoption date | **Last Amended**: 2026-10-31
+**Version**: 1.0.0 | **Ratified**: 2026-10-31 | **Last Amended**: 2026-10-31
