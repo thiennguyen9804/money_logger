@@ -1,10 +1,10 @@
 {
-  "ai": "copilot",
+  "ai": "vibe",
   "ai_skills": true,
   "allow_symlinks": false,
   "feature_numbering": "sequential",
   "here": false,
-  "integration": "copilot",
+  "integration": "vibe",
   "script": "ps",
   "speckit_version": "1.2.5"
 }

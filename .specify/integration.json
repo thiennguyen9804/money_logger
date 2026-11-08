@@ -2,14 +2,14 @@
   "version": "1.2.5",
   "integration_state_schema": 1,
   "installed_integrations": [
-    "copilot"
+    "vibe"
   ],
   "integration_settings": {
-    "copilot": {
+    "vibe": {
       "script": "ps",
       "invoke_separator": "-"
     }
   },
-  "integration": "copilot",
-  "default_integration": "copilot"
+  "integration": "vibe",
+  "default_integration": "vibe"
 }

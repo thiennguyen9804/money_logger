@@ -27,61 +27,39 @@ class TransactionCategory {
     required this.label,
     required this.icon,
     required this.color,
+    required this.type,
   });
 
   final String label;
   final IconData icon;
   final Color color;
+  final TransactionType type;
 }
-
-const transactionCategories = <TransactionCategory>[
-  TransactionCategory(
-    label: 'Food',
-    icon: Icons.restaurant_outlined,
-    color: Colors.orange,
-  ),
-  TransactionCategory(
-    label: 'Groceries',
-    icon: Icons.shopping_basket_outlined,
-    color: Colors.purple,
-  ),
-  TransactionCategory(
-    label: 'Transport',
-    icon: Icons.directions_car_outlined,
-    color: Colors.blue,
-  ),
-  TransactionCategory(
-    label: 'Utilities',
-    icon: Icons.bolt_outlined,
-    color: Colors.teal,
-  ),
-  TransactionCategory(
-    label: 'Income',
-    icon: Icons.payments_outlined,
-    color: Colors.green,
-  ),
-];
 
 const expenseTransactionCategories = <TransactionCategory>[
   TransactionCategory(
     label: 'Food',
     icon: Icons.restaurant_outlined,
     color: Colors.orange,
+    type: TransactionType.expense,
   ),
   TransactionCategory(
     label: 'Groceries',
     icon: Icons.shopping_basket_outlined,
     color: Colors.purple,
+    type: TransactionType.expense,
   ),
   TransactionCategory(
     label: 'Transport',
     icon: Icons.directions_car_outlined,
     color: Colors.blue,
+    type: TransactionType.expense,
   ),
   TransactionCategory(
     label: 'Utilities',
     icon: Icons.bolt_outlined,
     color: Colors.teal,
+    type: TransactionType.expense,
   ),
 ];
 
@@ -90,16 +68,19 @@ const incomeTransactionCategories = <TransactionCategory>[
     label: 'Income',
     icon: Icons.payments_outlined,
     color: Colors.green,
+    type: TransactionType.income,
   ),
   TransactionCategory(
     label: 'Freelance',
     icon: Icons.work_outline,
     color: Colors.green,
+    type: TransactionType.income,
   ),
   TransactionCategory(
     label: 'Gifts',
     icon: Icons.card_giftcard_outlined,
     color: Colors.lightGreen,
+    type: TransactionType.income,
   ),
 ];
 
@@ -108,6 +89,22 @@ const transactionEvents = <String>[
   'Holiday spending',
   'Home renovation',
   'Birthday celebration',
+];
+
+// Helper function to get categories by type
+List<TransactionCategory> getCategoriesByType(TransactionType type) {
+  switch (type) {
+    case TransactionType.expense:
+      return expenseTransactionCategories;
+    case TransactionType.income:
+      return incomeTransactionCategories;
+  }
+}
+
+// Helper function to get all categories as a single list
+List<TransactionCategory> get allCategories => [
+  ...expenseTransactionCategories,
+  ...incomeTransactionCategories,
 ];
 
 class TransactionDraft {
@@ -120,6 +117,31 @@ class TransactionDraft {
   DateTime createdAt;
   String? eventContext;
   bool isMoreDetailsExpanded = false;
+}
+
+// Category Selection Session state per data-model.md
+class CategorySelectionSession {
+  CategorySelectionSession({
+    required this.initialType,
+    TransactionType? activeTab,
+    this.selectedCategory,
+  }) : activeTab = activeTab ?? initialType;
+
+  final TransactionType initialType;
+  final TransactionType activeTab;
+  final TransactionCategory? selectedCategory;
+
+  CategorySelectionSession copyWith({
+    TransactionType? initialType,
+    TransactionType? activeTab,
+    TransactionCategory? selectedCategory,
+  }) {
+    return CategorySelectionSession(
+      initialType: initialType ?? this.initialType,
+      activeTab: activeTab,
+      selectedCategory: selectedCategory ?? this.selectedCategory,
+    );
+  }
 }
 
 int? parsePositiveMinorUnits(String rawAmount) {
@@ -564,6 +586,7 @@ class _AppShellState extends State<AppShell> {
           label: 'Food',
           icon: Icons.restaurant_outlined,
           color: Colors.orange,
+          type: TransactionType.expense,
         ),
         description: 'Corner Coffee Shop',
         amountMinorUnits: 675,
@@ -577,6 +600,7 @@ class _AppShellState extends State<AppShell> {
           label: 'Income',
           icon: Icons.work_outline,
           color: Colors.green,
+          type: TransactionType.income,
         ),
         description: 'Monthly Salary',
         amountMinorUnits: 320000,
@@ -590,6 +614,7 @@ class _AppShellState extends State<AppShell> {
           label: 'Utilities',
           icon: Icons.bolt_outlined,
           color: Colors.blue,
+          type: TransactionType.expense,
         ),
         description: 'Electricity Bill',
         amountMinorUnits: 12500,
@@ -603,6 +628,7 @@ class _AppShellState extends State<AppShell> {
           label: 'Groceries',
           icon: Icons.shopping_basket_outlined,
           color: Colors.purple,
+          type: TransactionType.expense,
         ),
         description: 'Weekly Groceries',
         amountMinorUnits: 8420,
@@ -616,6 +642,7 @@ class _AppShellState extends State<AppShell> {
           label: 'Utilities',
           icon: Icons.wifi_outlined,
           color: Colors.teal,
+          type: TransactionType.expense,
         ),
         description: 'Home Internet',
         amountMinorUnits: 4999,
@@ -629,6 +656,7 @@ class _AppShellState extends State<AppShell> {
           label: 'Income',
           icon: Icons.payments_outlined,
           color: Colors.green,
+          type: TransactionType.income,
         ),
         description: 'Freelance Payment',
         amountMinorUnits: 85000,
@@ -911,6 +939,108 @@ class _DestinationView extends StatelessWidget {
   }
 }
 
+// Custom segmented control with contextual active colors per FR-006 and FR-007
+class _TypeSegmentedControl extends StatelessWidget {
+  const _TypeSegmentedControl({
+    required this.selectedType,
+    required this.onSelected,
+  });
+
+  final TransactionType selectedType;
+  final ValueChanged<TransactionType> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Card(
+      margin: EdgeInsets.zero,
+      color: colorScheme.surfaceContainerHighest,
+      child: Row(
+        children: [
+          Expanded(
+            child: _TypeSegment(
+              label: 'Expense',
+              icon: Icons.arrow_upward,
+              isSelected: selectedType == TransactionType.expense,
+              activeColor: Colors.red.withValues(alpha: 0.18),
+              onTap: () => onSelected(TransactionType.expense),
+            ),
+          ),
+          // Income segment
+          Expanded(
+            child: _TypeSegment(
+              label: 'Income',
+              icon: Icons.arrow_downward,
+              isSelected: selectedType == TransactionType.income,
+              activeColor: Colors.lightGreen.withValues(alpha: 0.2),
+              onTap: () => onSelected(TransactionType.income),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Individual type segment with contextual styling
+class _TypeSegment extends StatelessWidget {
+  const _TypeSegment({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.activeColor,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final Color activeColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final backgroundColor = isSelected
+        ? activeColor
+        : colorScheme.surfaceContainerHighest;
+    final foregroundColor = isSelected
+        ? colorScheme.onSurface
+        : colorScheme.onSurfaceVariant;
+
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      
+      label: label,
+      child: InkWell(
+        onTap: onTap,
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            border: Border.all(
+              color: colorScheme.outline.withValues(alpha: 0.3),
+              width: 0.5,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: foregroundColor, size: 20),
+              const SizedBox(width: 8),
+              Text(label, style: TextStyle(color: foregroundColor)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _AddTransactionPage extends StatefulWidget {
   const _AddTransactionPage();
 
@@ -966,11 +1096,22 @@ class _AddTransactionPageState extends State<_AddTransactionPage> {
 
   void _save() {
     final amount = parsePositiveMinorUnits(_draft.amountText);
-    if (amount == null || _draft.category == null) {
+    if (amount == null) {
       setState(() {
-        _amountError = amount == null
-            ? 'Enter an amount greater than zero.'
-            : 'Select a category.';
+        _amountError = 'Enter an amount greater than zero.';
+      });
+      return;
+    }
+    if (_draft.category == null) {
+      setState(() {
+        _amountError = 'Select a category.';
+      });
+      return;
+    }
+    // Validate that category type matches draft type (FR-003, FR-005)
+    if (_draft.category!.type != _draft.type) {
+      setState(() {
+        _amountError = 'Category type does not match transaction type.';
       });
       return;
     }
@@ -982,9 +1123,6 @@ class _AddTransactionPageState extends State<_AddTransactionPage> {
     final theme = Theme.of(context);
     final amountIsValid = parsePositiveMinorUnits(_draft.amountText) != null;
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
-    final typeColor = _draft.type == TransactionType.expense
-        ? Colors.red.withValues(alpha: 0.18)
-        : Colors.lightGreen.withValues(alpha: 0.2);
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -1012,28 +1150,25 @@ class _AddTransactionPageState extends State<_AddTransactionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SegmentedButton<TransactionType>(
-                  segments: const [
-                    ButtonSegment(
-                      value: TransactionType.expense,
-                      label: Text('Expense'),
-                      icon: Icon(Icons.arrow_upward),
-                    ),
-                    ButtonSegment(
-                      value: TransactionType.income,
-                      label: Text('Income'),
-                      icon: Icon(Icons.arrow_downward),
-                    ),
-                  ],
-                  selected: {_draft.type},
-                  onSelectionChanged: (selection) {
-                    setState(() => _draft.type = selection.first);
+                // Custom segmented control with contextual active colors
+                _TypeSegmentedControl(
+                  selectedType: _draft.type,
+                  onSelected: (newType) {
+                    setState(() {
+                      _draft.type = newType;
+                      // Clear category if it doesn't match the new type (FR-005)
+                      if (_draft.category != null &&
+                          _draft.category!.type != newType) {
+                        _draft.category = null;
+                      }
+                    });
                   },
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _amountController,
-                  onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
+                  onTapOutside: (event) =>
+                      FocusManager.instance.primaryFocus?.unfocus(),
                   autofocus: true,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -1076,11 +1211,15 @@ class _AddTransactionPageState extends State<_AddTransactionPage> {
                           MaterialPageRoute(
                             builder: (context) => _CategorySelectionPage(
                               selectedCategory: _draft.category,
+                              initialTransactionType: _draft.type,
                             ),
                           ),
                         );
                     if (mounted && category != null) {
-                      setState(() => _draft.category = category);
+                      setState(() {
+                        _draft.category = category;
+                        _draft.type = category.type;
+                      });
                     }
                   },
                 ),
@@ -1147,16 +1286,27 @@ class _AddTransactionPageState extends State<_AddTransactionPage> {
 }
 
 class _CategorySelectionPage extends StatefulWidget {
-  const _CategorySelectionPage({this.selectedCategory});
+  const _CategorySelectionPage({
+    this.selectedCategory,
+    required this.initialTransactionType,
+  });
 
   final TransactionCategory? selectedCategory;
+  final TransactionType initialTransactionType;
 
   @override
   State<_CategorySelectionPage> createState() => _CategorySelectionPageState();
 }
 
 class _CategorySelectionPageState extends State<_CategorySelectionPage> {
-  int _tabIndex = 0;
+  late int _tabIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize tab index based on transaction type: 0 for Expense, 1 for Income
+    _tabIndex = widget.initialTransactionType == TransactionType.income ? 1 : 0;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1178,32 +1328,57 @@ class _CategorySelectionPageState extends State<_CategorySelectionPage> {
             onTap: (index) => setState(() => _tabIndex = index),
           ),
         ),
-        body: ListView.separated(
-          padding: const EdgeInsets.all(20),
-          itemCount: categories.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 8),
-          itemBuilder: (context, index) {
-            final category = categories[index];
-            final selected = category == widget.selectedCategory;
-            return Semantics(
-              button: true,
-              selected: selected,
-              label:
-                  '${category.label} category${selected ? ', selected' : ''}',
-              child: Card(
-                color: selected
-                    ? Theme.of(context).colorScheme.secondaryContainer
-                    : null,
-                child: ListTile(
-                  leading: Icon(category.icon, color: category.color),
-                  title: Text(category.label),
-                  trailing: selected ? const Icon(Icons.check) : null,
-                  onTap: () => Navigator.of(context).pop(category),
+        body: categories.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.category_outlined,
+                      size: 64,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No categories available',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'There are no categories for this type',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
+              )
+            : ListView.separated(
+                padding: const EdgeInsets.all(20),
+                itemCount: categories.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 8),
+                itemBuilder: (context, index) {
+                  final category = categories[index];
+                  final selected = category == widget.selectedCategory;
+                  return Semantics(
+                    button: true,
+                    selected: selected,
+                    label:
+                        '${category.label} category${selected ? ', selected' : ''}',
+                    child: Card(
+                      color: selected
+                          ? Theme.of(context).colorScheme.secondaryContainer
+                          : null,
+                      child: ListTile(
+                        leading: Icon(category.icon, color: category.color),
+                        title: Text(category.label),
+                        trailing: selected ? const Icon(Icons.check) : null,
+                        onTap: () => Navigator.of(context).pop(category),
+                      ),
+                    ),
+                  );
+                },
               ),
-            );
-          },
-        ),
       ),
     );
   }
