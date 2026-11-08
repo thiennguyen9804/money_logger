@@ -69,6 +69,12 @@ jobs:
         run: |
           mkdir -p artifacts
           cp build/app/outputs/flutter-apk/*.apk artifacts/
+      
+      - name: 📤 Upload APK Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-release-apks
+          path: artifacts/*.apk
 
       # ─────────────── ONLY ON TAGS ───────────────
       - name: 🏷️ Create or update Release
