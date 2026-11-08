@@ -11,9 +11,9 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-- [ ] T001 Add `flutter_bloc` and `equatable` to `pubspec.yaml` dependencies at versions compatible with the Dart SDK constraint `^3.13.7`, then run `flutter pub get` to resolve and lock them
-- [ ] T002 Capture pre-refactor baseline behavior for parity checks: run `dart format lib/main.dart --output none --set-exit-if-changed 2>&1 || dart format lib/main.dart` and `flutter analyze lib/main.dart`, and record the current findings count as the comparison point for the zero-findings target
-- [ ] T003 [P] Create empty module directories: `lib/models/`, `lib/blocs/theme/`, `lib/blocs/ledger/`, `lib/shared/widgets/`, `lib/shared/theme/`, `lib/screens/dashboard/widgets/`, `lib/screens/transactions/widgets/`, `lib/screens/add_transaction/widgets/`
+- [x] T001 Add `flutter_bloc` and `equatable` to `pubspec.yaml` dependencies at versions compatible with the Dart SDK constraint `^3.13.7`, then run `flutter pub get` to resolve and lock them
+- [x] T002 Capture pre-refactor baseline behavior for parity checks: run `dart format lib/main.dart --output none --set-exit-if-changed 2>&1 || dart format lib/main.dart` and `flutter analyze lib/main.dart`, and record the current findings count as the comparison point for the zero-findings target
+- [x] T003 [P] Create empty module directories: `lib/models/`, `lib/blocs/theme/`, `lib/blocs/ledger/`, `lib/shared/widgets/`, `lib/shared/theme/`, `lib/screens/dashboard/widgets/`, `lib/screens/transactions/widgets/`, `lib/screens/add_transaction/widgets/`
 
 **Checkpoint**: Dependencies resolved; module skeleton in place.
 
@@ -23,15 +23,15 @@
 
 **Goal**: Every event and state class extends `Equatable`; handwritten `StreamController` state management is removed; blocs are provided at the composition root. (FR-001, FR-002, FR-003, SC-001)
 
-- [ ] T004 Create `lib/blocs/theme/theme_event.dart` with `ThemeModeChanged(mode)` extending `Equatable`, props derived from constructor arguments (FR-002)
-- [ ] T005 Create `lib/blocs/theme/theme_state.dart` with `ThemeState(mode)` extending `Equatable` (FR-003)
-- [ ] T006 Create `lib/blocs/theme/theme_bloc.dart` as a `flutter_bloc` `Bloc<ThemeEvent, ThemeState>`; business logic (mode switching) lives strictly in `on<ThemeModeChanged>` handlers (FR-001)
-- [ ] T007 Create `lib/blocs/ledger/ledger_event.dart` with `LedgerMonthSelected(month)` and `LedgerRefreshed(transactions)` extending `Equatable` (FR-002)
-- [ ] T008 Create `lib/blocs/ledger/ledger_state.dart` with `LedgerState(visibleMonths, selectedMonth, groupedTransactions)` extending `Equatable` (FR-003, value equality must prevent redundant ledger rebuilds)
-- [ ] T009 Create `lib/blocs/ledger/ledger_bloc.dart` as a `flutter_bloc` `Bloc<LedgerEvent, LedgerState>`; ledger grouping and month filtering business logic lives strictly in `on<LedgerEvent>` handlers (FR-001)
-- [ ] T010 Delete the handwritten `ThemeBloc` class (StreamController-based) from `lib/main.dart`; remove all manual state-diff and stream-closing boilerplate it contained (FR-001, SC-001)
-- [ ] T011 Wire `MultiBlocProvider` in `main.dart` as the composition root, providing `ThemeBloc` and `LedgerBloc` above `MaterialApp` (FR-001, R4 decision in research.md)
-- [ ] T012 Verify zero references to `StreamController`, manual `.add()` state diffs, or handwritten bloc classes remain under `lib/` (SC-001)
+- [x] T004 Create `lib/blocs/theme/theme_event.dart` with `ThemeModeChanged(mode)` extending `Equatable`, props derived from constructor arguments (FR-002)
+- [x] T005 Create `lib/blocs/theme/theme_state.dart` with `ThemeState(mode)` extending `Equatable` (FR-003)
+- [x] T006 Create `lib/blocs/theme/theme_bloc.dart` as a `flutter_bloc` `Bloc<ThemeEvent, ThemeState>`; business logic (mode switching) lives strictly in `on<ThemeModeChanged>` handlers (FR-001)
+- [x] T007 Create `lib/blocs/ledger/ledger_event.dart` with `LedgerMonthSelected(month)` and `LedgerRefreshed(transactions)` extending `Equatable` (FR-002)
+- [x] T008 Create `lib/blocs/ledger/ledger_state.dart` with `LedgerState(visibleMonths, selectedMonth, groupedTransactions)` extending `Equatable` (FR-003, value equality must prevent redundant ledger rebuilds)
+- [x] T009 Create `lib/blocs/ledger/ledger_bloc.dart` as a `flutter_bloc` `Bloc<LedgerEvent, LedgerState>`; ledger grouping and month filtering business logic lives strictly in `on<LedgerEvent>` handlers (FR-001)
+- [x] T010 Delete the handwritten `ThemeBloc` class (StreamController-based) from `lib/main.dart`; remove all manual state-diff and stream-closing boilerplate it contained (FR-001, SC-001)
+- [x] T011 Wire `MultiBlocProvider` in `main.dart` as the composition root, providing `ThemeBloc` and `LedgerBloc` above `MaterialApp` (FR-001, R4 decision in research.md)
+- [x] T012 Verify zero references to `StreamController`, manual `.add()` state diffs, or handwritten bloc classes remain under `lib/` (SC-001)
 
 **Checkpoint**: All state flows through `flutter_bloc` blocs; every event/state extends `Equatable`; no StreamController remains.
 
@@ -45,10 +45,10 @@
 
 ### Implementation
 
-- [ ] T013 Replace the custom `_TypeSegmentedControl` and `_TypeSegment` widgets in `lib/main.dart` (or the extracted add-transaction screen file) with Flutter's built-in `SegmentedButton<TransactionType>` (FR-004)
-- [ ] T014 Bind segment selected/foreground colors to `ThemeData.colorScheme` (e.g. `colorScheme.primary`, `colorScheme.secondaryContainer`) with zero hard-coded `Colors.red`/`Colors.green` values (FR-005)
-- [ ] T015 [P] Verify selection state still synchronizes type and category per feature 007 rules: changing type clears or replaces an incompatible selected category, and back-without-selection preserves the original pair (FR-008 behavior parity)
-- [ ] T016 [P] Verify active/inactive segments remain readable and distinguishable in light and dark themes without relying on color alone (SC-003 visual parity)
+- [x] T013 Replace the custom `_TypeSegmentedControl` and `_TypeSegment` widgets in `lib/main.dart` (or the extracted add-transaction screen file) with Flutter's built-in `SegmentedButton<TransactionType>` (FR-004)
+- [x] T014 Bind segment selected/foreground colors to `ThemeData.colorScheme` (e.g. `colorScheme.primary`, `colorScheme.secondaryContainer`) with zero hard-coded `Colors.red`/`Colors.green` values (FR-005)
+- [x] T015 [P] Verify selection state still synchronizes type and category per feature 007 rules: changing type clears or replaces an incompatible selected category, and back-without-selection preserves the original pair (FR-008 behavior parity)
+- [x] T016 [P] Verify active/inactive segments remain readable and distinguishable in light and dark themes without relying on color alone (SC-003 visual parity)
 
 **Checkpoint**: US2 deliverable — the selector is a native Material 3 widget; no custom segment control code remains under `lib/`.
 
@@ -60,14 +60,14 @@
 
 ### Implementation
 
-- [ ] T017 Extract `Transaction`, `TransactionCategory`, `TransactionDraft`, `WalletSummary`, `LedgerMonth`, and `TransactionDateGroup` models into `lib/models/` with barrel-file exports
-- [ ] T018 Extract cross-screen reusable widgets shared by two or more screens (e.g., `TransactionListItem`, `TransactionDateGroupView`, `LedgerMonthSelector`, `RecentTransactionRow`, balance/visibility controls) into `lib/shared/widgets/`
-- [ ] T019 Split the Dashboard view into `lib/screens/dashboard/dashboard_screen.dart` plus a per-screen `widgets/` subfolder for dashboard-unique components (e.g., `WalletBalanceCard`)
-- [ ] T020 Split the Transactions ledger view into `lib/screens/transactions/transactions_screen.dart` plus per-screen widgets
-- [ ] T021 Split the Add Transaction and Category Selection pages into `lib/screens/add_transaction/add_transaction_screen.dart` and `lib/screens/category_selection/category_selection_screen.dart`
-- [ ] T022 Split the App Shell, primary navigation, and destination routing into `lib/screens/shell/` with per-screen widgets in an adjacent `widgets/` folder
-- [ ] T023 [P] Verify no file under `lib/` imports `main.dart` (FR-007) and no feature-specific widget file remains at the `lib/` root (SC-004)
-- [ ] T024 [P] Verify every widget used by more than one screen resolves to `lib/shared/widgets/`, not a screen-specific folder (FR-006)
+- [x] T017 Extract `Transaction`, `TransactionCategory`, `TransactionDraft`, `WalletSummary`, `LedgerMonth`, and `TransactionDateGroup` models into `lib/models/` with barrel-file exports
+- [x] T018 Extract cross-screen reusable widgets shared by two or more screens (e.g., `TransactionListItem`, `TransactionDateGroupView`, `LedgerMonthSelector`, `RecentTransactionRow`, balance/visibility controls) into `lib/shared/widgets/`
+- [x] T019 Split the Dashboard view into `lib/screens/dashboard/dashboard_screen.dart` plus a per-screen `widgets/` subfolder for dashboard-unique components (e.g., `WalletBalanceCard`)
+- [x] T020 Split the Transactions ledger view into `lib/screens/transactions/transactions_screen.dart` plus per-screen widgets
+- [x] T021 Split the Add Transaction and Category Selection pages into `lib/screens/add_transaction/add_transaction_screen.dart` and `lib/screens/category_selection/category_selection_screen.dart`
+- [x] T022 Split the App Shell, primary navigation, and destination routing into `lib/screens/shell/` with per-screen widgets in an adjacent `widgets/` folder
+- [x] T023 [P] Verify no file under `lib/` imports `main.dart` (FR-007) and no feature-specific widget file remains at the `lib/` root (SC-004)
+- [x] T024 [P] Verify every widget used by more than one screen resolves to `lib/shared/widgets/`, not a screen-specific folder (FR-006)
 
 **Checkpoint**: US3 deliverable — `lib/` contains only `main.dart` (composition root) plus the modular `screens/`, `shared/`, `blocs/`, and `models/` trees; no orphaned files.
 
@@ -75,10 +75,10 @@
 
 ## Phase 5: Polish & Cross-Cutting Validation
 
-- [ ] T025 [P] Run `dart format lib/` and resolve any formatting changes
-- [ ] T026 [P] Run `flutter analyze` and confirm zero findings across all refactored files
-- [ ] T027 [P] Manually verify quickstart.md runtime scenarios 1-5: theme toggle repaints without state loss; adding a transaction updates dashboard and ledger immediately; type/category compatibility enforced; draft content survives navigation; `flutter analyze` reports zero findings
-- [ ] T028 [P] Verify SC-001 through SC-004: Equatable adoption, no deleted-widget references, visual parity in light and dark themes, and no feature-specific widget files at the `lib/` root
+- [x] T025 [P] Run `dart format lib/` and resolve any formatting changes
+- [x] T026 [P] Run `flutter analyze` and confirm zero findings across all refactored files
+- [x] T027 [P] Manually verify quickstart.md runtime scenarios 1-5: theme toggle repaints without state loss; adding a transaction updates dashboard and ledger immediately; type/category compatibility enforced; draft content survives navigation; `flutter analyze` reports zero findings
+- [x] T028 [P] Verify SC-001 through SC-004: Equatable adoption, no deleted-widget references, visual parity in light and dark themes, and no feature-specific widget files at the `lib/` root
 
 **Checkpoint**: All refactor work complete; behavior parity confirmed; codebase ready for `/speckit-implement`.
 
