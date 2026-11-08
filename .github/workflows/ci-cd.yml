@@ -1,0 +1,9 @@
+name: Run CI
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  call-flutter-build:
+    uses: nabilnalakath/flutter-githubaction/.github/workflows/main.yml@master
