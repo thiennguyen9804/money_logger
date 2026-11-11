@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
-enum TransactionType { income, expense }
+import 'category.dart';
+import 'transaction_type.dart';
+
+export 'category.dart';
+export 'transaction_type.dart';
 
 enum BalanceVisibilityState { visible, masked }
 
@@ -16,6 +20,15 @@ class WalletSummary {
   final String currencySymbol;
 }
 
+/// Legacy TransactionCategory for backwards compatibility.
+///
+/// New code should use the Category class hierarchy (ExpenseCategory, IncomeCategory)
+/// from category_list.dart. This class is maintained for existing code compatibility.
+///
+/// Note: The color field is deprecated. Use ThemeData.colorScheme for theme-aware colors.
+@Deprecated(
+  'Use ExpenseCategory or IncomeCategory from category_list.dart instead',
+)
 class TransactionCategory {
   const TransactionCategory({
     required this.label,
@@ -45,23 +58,39 @@ class Transaction {
 
   final String id;
   final int sequence;
-  final TransactionCategory category;
+  final Category category;
   final String description;
   final int amountMinorUnits;
   final TransactionType type;
   final DateTime createdAt;
 }
 
+/// TransactionDraft represents an in-progress transaction being composed by the user.
+///
+/// This class is used in the Add Transaction flow and maintains the draft state.
+/// Validation rules:
+/// - If category is set, type must match category.type
+/// - If type is set, category must be compatible or null
+/// - Amount text must be parseable to a valid positive number
+/// - Description max length: 255 characters
 class TransactionDraft {
-  TransactionDraft({this.category, DateTime? createdAt})
+  TransactionDraft({Category? category, DateTime? createdAt})
     : createdAt = createdAt ?? DateTime.now();
 
   String amountText = '';
   TransactionType type = TransactionType.expense;
-  TransactionCategory? category;
+  Category? category;
   DateTime createdAt;
   String? eventContext;
   bool isMoreDetailsExpanded = false;
+
+  /// Validates that the draft has a valid type-category pairing.
+  ///
+  /// Returns true if valid, false if there's a mismatch.
+  bool get isTypeCategoryValid {
+    if (category == null) return true;
+    return category!.type == type;
+  }
 }
 
 const transactionEvents = <String>[

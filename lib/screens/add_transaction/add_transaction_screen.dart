@@ -158,7 +158,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(
                     _draft.category?.icon ?? Icons.category_outlined,
-                    color: _draft.category?.color,
                   ),
                   title: Text(
                     _draft.category?.label ?? 'Select Category',
@@ -166,15 +165,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
-                    final category = await Navigator.of(context)
-                        .push<TransactionCategory>(
-                          MaterialPageRoute(
-                            builder: (context) => CategorySelectionScreen(
-                              selectedCategory: _draft.category,
-                              initialTransactionType: _draft.type,
-                            ),
-                          ),
-                        );
+                    final category = await Navigator.of(context).push<Category>(
+                      MaterialPageRoute(
+                        builder: (context) => CategorySelectionScreen(
+                          selectedCategory: _draft.category,
+                          initialTransactionType: _draft.type,
+                        ),
+                      ),
+                    );
                     if (mounted && category != null) {
                       setState(() {
                         _draft.category = category;

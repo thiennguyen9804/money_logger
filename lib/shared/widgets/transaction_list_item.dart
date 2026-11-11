@@ -33,8 +33,10 @@ class TransactionListItem extends StatelessWidget {
         : transaction.type == TransactionType.income
         ? 'Income'
         : 'Expense';
+    // Use theme-aware color instead of category-specific color
+    // All categories use the same background with alpha blend
     final categoryColor = Color.alphaBlend(
-      transaction.category.color.withValues(alpha: 0.75),
+      colorScheme.primary.withValues(alpha: 0.75),
       colorScheme.surface,
     );
 

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../add_transaction/add_transaction_screen.dart';
-import '../../models/categories.dart';
+import '../add_transaction/routes/slide_up_route.dart';
+import '../../models/category_list.dart';
 import '../../models/ledger.dart';
 import '../../models/transaction.dart';
 import 'app_destination.dart';
@@ -33,7 +34,7 @@ class _AppShellState extends State<AppShell> {
         Transaction(
           id: 'coffee-shop',
           sequence: 4,
-          category: expenseFoodCategory,
+          category: ExpenseCategory.foodAndBeverage,
           description: 'Corner Coffee Shop',
           amountMinorUnits: 675,
           type: TransactionType.expense,
@@ -42,7 +43,7 @@ class _AppShellState extends State<AppShell> {
         Transaction(
           id: 'salary',
           sequence: 3,
-          category: incomeSalaryCategory,
+          category: IncomeCategory.salary,
           description: 'Monthly Salary',
           amountMinorUnits: 320000,
           type: TransactionType.income,
@@ -51,7 +52,7 @@ class _AppShellState extends State<AppShell> {
         Transaction(
           id: 'electricity',
           sequence: 2,
-          category: expenseUtilitiesCategory,
+          category: ExpenseCategory.onlineServices,
           description: 'Electricity Bill',
           amountMinorUnits: 12500,
           type: TransactionType.expense,
@@ -60,7 +61,7 @@ class _AppShellState extends State<AppShell> {
         Transaction(
           id: 'groceries',
           sequence: 1,
-          category: expenseGroceriesCategory,
+          category: ExpenseCategory.shopping,
           description: 'Weekly Groceries',
           amountMinorUnits: 8420,
           type: TransactionType.expense,
@@ -69,7 +70,7 @@ class _AppShellState extends State<AppShell> {
         Transaction(
           id: 'internet',
           sequence: 5,
-          category: expenseUtilitiesInternetCategory,
+          category: ExpenseCategory.onlineServices,
           description: 'Home Internet',
           amountMinorUnits: 4999,
           type: TransactionType.expense,
@@ -78,7 +79,7 @@ class _AppShellState extends State<AppShell> {
         Transaction(
           id: 'freelance',
           sequence: 6,
-          category: incomeFreelanceCategory,
+          category: IncomeCategory.otherIncome,
           description: 'Freelance Payment',
           amountMinorUnits: 85000,
           type: TransactionType.income,
@@ -151,7 +152,7 @@ class _AppShellState extends State<AppShell> {
   Future<void> _showAddTransactionPage() async {
     final previousIndex = _selectedIndex;
     final draft = await Navigator.of(context).push<TransactionDraft>(
-      MaterialPageRoute(builder: (context) => const AddTransactionScreen()),
+      SlideUpRoute(builder: (context) => const AddTransactionScreen()),
     );
 
     if (!mounted || draft == null) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 import '../../models/categories.dart';
-import '../../models/transaction.dart';
 
 class CategorySelectionScreen extends StatefulWidget {
   const CategorySelectionScreen({
@@ -10,7 +10,7 @@ class CategorySelectionScreen extends StatefulWidget {
     super.key,
   });
 
-  final TransactionCategory? selectedCategory;
+  final Category? selectedCategory;
   final TransactionType initialTransactionType;
 
   @override
@@ -30,8 +30,8 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
   @override
   Widget build(BuildContext context) {
     final categories = _tabIndex == 0
-        ? expenseTransactionCategories
-        : incomeTransactionCategories;
+        ? ExpenseCategory.values
+        : IncomeCategory.values;
 
     return DefaultTabController(
       length: 2,
@@ -89,7 +89,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                           ? Theme.of(context).colorScheme.secondaryContainer
                           : null,
                       child: ListTile(
-                        leading: Icon(category.icon, color: category.color),
+                        leading: Icon(category.icon),
                         title: Text(category.label),
                         trailing: selected ? const Icon(Icons.check) : null,
                         onTap: () => Navigator.of(context).pop(category),

@@ -2,14 +2,14 @@
   "version": "1.2.5",
   "integration_state_schema": 1,
   "installed_integrations": [
-    "vibe"
+    "codex"
   ],
   "integration_settings": {
-    "vibe": {
+    "codex": {
       "script": "ps",
       "invoke_separator": "-"
     }
   },
-  "integration": "vibe",
-  "default_integration": "vibe"
+  "integration": "codex",
+  "default_integration": "codex"
 }
