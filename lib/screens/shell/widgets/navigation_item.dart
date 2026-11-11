@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app_destination.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 class NavigationItem extends StatelessWidget {
   const NavigationItem({
@@ -20,6 +21,7 @@ class NavigationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final label = destination.label(AppLocalizations.of(context)!);
     final colorScheme = Theme.of(context).colorScheme;
     final foregroundColor = selected
         ? colorScheme.primary
@@ -28,7 +30,7 @@ class NavigationItem extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: destination.label,
+      label: label,
       child: InkWell(
         onTap: () => onPressed(index),
         borderRadius: BorderRadius.circular(16),
@@ -54,7 +56,7 @@ class NavigationItem extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                destination.label,
+                label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(

@@ -9,15 +9,9 @@ export 'transaction_type.dart';
 enum BalanceVisibilityState { visible, masked }
 
 class WalletSummary {
-  const WalletSummary({
-    required this.amountMinorUnits,
-    required this.currencyCode,
-    required this.currencySymbol,
-  });
+  const WalletSummary({required this.amountMinorUnits});
 
   final int amountMinorUnits;
-  final String currencyCode;
-  final String currencySymbol;
 }
 
 /// Legacy TransactionCategory for backwards compatibility.
@@ -100,19 +94,21 @@ const transactionEvents = <String>[
   'Birthday celebration',
 ];
 
-int? parsePositiveMinorUnits(String rawAmount) {
-  final normalized = rawAmount.trim().replaceAll(',', '');
-  if (normalized.isEmpty ||
-      !RegExp(r'^\d+(\.\d{1,2})?$').hasMatch(normalized)) {
-    return null;
-  }
-
+int? parsePositiveMinorUnits(
+  String rawAmount, [
+  Locale locale = const Locale('en', 'US'),
+]) {
+  final raw = rawAmount.trim();
+  final isVnd = locale.languageCode == 'vi';
+  final pattern = isVnd
+      ? RegExp(r'^\d+$')
+      : RegExp(r'^(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d{1,2})?$');
+  if (!pattern.hasMatch(raw)) return null;
+  final normalized = raw.replaceAll(',', '');
   final parts = normalized.split('.');
-  final wholeUnits = int.tryParse(parts.first);
-  if (wholeUnits == null) {
-    return null;
-  }
+  final whole = int.tryParse(parts.first);
+  if (whole == null) return null;
   final fraction = parts.length == 1 ? '00' : parts[1].padRight(2, '0');
-  final minorUnits = wholeUnits * 100 + int.parse(fraction);
-  return minorUnits > 0 ? minorUnits : null;
+  final minor = whole * 100 + int.parse(fraction);
+  return minor > 0 ? minor : null;
 }

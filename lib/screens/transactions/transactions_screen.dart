@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../models/ledger.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../shared/formatters/currency_formatter.dart';
 import '../../models/transaction.dart';
 import '../shell/destination_view_state.dart';
 import 'widgets/ledger_month_selector.dart';
@@ -67,14 +69,15 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context)!;
     final wallet = widget.dashboardSession.walletSummary;
     final isBalanceVisible =
         widget.dashboardSession.balanceVisibility ==
         BalanceVisibilityState.visible;
     final balanceText = isBalanceVisible
-        ? formatMinorCurrency(
-            amountMinorUnits: wallet.amountMinorUnits,
-            currencySymbol: wallet.currencySymbol,
+        ? CurrencyFormatter.formatMinorUnits(
+            wallet.amountMinorUnits,
+            Localizations.localeOf(context),
           )
         : '••••••';
     final filteredTransactions = filterTransactionsForMonth(
@@ -84,14 +87,14 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     final groups = deriveTransactionDateGroups(filteredTransactions);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Transactions')),
+      appBar: AppBar(title: Text(l.transactions)),
       body: Column(
         children: [
           Semantics(
             container: true,
             label: isBalanceVisible
-                ? 'Current Balance. $balanceText.'
-                : 'Current Balance. Balance hidden.',
+                ? '${l.currentBalance}. $balanceText.'
+                : '${l.currentBalance}. ${l.balanceHidden}.',
             child: Container(
               width: double.infinity,
               color: colorScheme.surfaceContainerHighest,
@@ -103,7 +106,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Current Balance',
+                          l.currentBalance,
                           style: Theme.of(context).textTheme.labelLarge,
                         ),
                         ExcludeSemantics(
@@ -125,11 +128,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   ),
                   Semantics(
                     button: true,
-                    label: isBalanceVisible ? 'Hide balance' : 'Show balance',
+                    label: isBalanceVisible ? l.hideBalance : l.showBalance,
                     child: IconButton(
-                      tooltip: isBalanceVisible
-                          ? 'Hide balance'
-                          : 'Show balance',
+                      tooltip: isBalanceVisible ? l.hideBalance : l.showBalance,
                       onPressed: () {
                         widget.onBalanceVisibilityChanged(
                           isBalanceVisible
@@ -159,21 +160,18 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
               children: [
                 if (groups.isEmpty)
-                  const Card(
+                  Card(
                     child: Padding(
                       padding: EdgeInsets.all(24),
                       child: Text(
-                        'No transactions recorded for this month.',
+                        l.noMonthTransactions,
                         textAlign: TextAlign.center,
                       ),
                     ),
                   )
                 else
                   for (final group in groups)
-                    TransactionDateGroupView(
-                      group: group,
-                      currencySymbol: wallet.currencySymbol,
-                    ),
+                    TransactionDateGroupView(group: group),
               ],
             ),
           ),

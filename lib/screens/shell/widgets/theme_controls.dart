@@ -4,13 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../blocs/theme/theme_bloc.dart';
 import '../../../blocs/theme/theme_event.dart';
 import '../../../blocs/theme/theme_state.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 class ThemeControls extends StatelessWidget {
   const ThemeControls({super.key});
-
   @override
   Widget build(BuildContext context) {
-    final themeBloc = context.read<ThemeBloc>();
+    final bloc = context.read<ThemeBloc>();
+    final l = AppLocalizations.of(context)!;
     return BlocBuilder<ThemeBloc, ThemeState>(
       builder: (context, state) {
         final mode = state.mode;
@@ -18,30 +19,28 @@ class ThemeControls extends StatelessWidget {
           child: Column(
             children: [
               SwitchListTile(
-                title: const Text('Dark mode'),
-                subtitle: Text(mode == ThemeMode.dark ? 'Enabled' : 'Disabled'),
+                title: Text(l.darkMode),
+                subtitle: Text(mode == ThemeMode.dark ? l.enabled : l.disabled),
                 value: mode == ThemeMode.dark,
-                onChanged: (enabled) {
-                  themeBloc.add(
-                    SetThemeMode(enabled ? ThemeMode.dark : ThemeMode.light),
-                  );
-                },
+                onChanged: (enabled) => bloc.add(
+                  SetThemeMode(enabled ? ThemeMode.dark : ThemeMode.light),
+                ),
               ),
               OverflowBar(
                 children: [
                   TextButton(
                     onPressed: () =>
-                        themeBloc.add(const SetThemeMode(ThemeMode.light)),
-                    child: const Text('Light'),
+                        bloc.add(const SetThemeMode(ThemeMode.light)),
+                    child: Text(l.light),
                   ),
                   TextButton(
                     onPressed: () =>
-                        themeBloc.add(const SetThemeMode(ThemeMode.dark)),
-                    child: const Text('Dark'),
+                        bloc.add(const SetThemeMode(ThemeMode.dark)),
+                    child: Text(l.dark),
                   ),
                   TextButton(
-                    onPressed: () => themeBloc.add(const ToggleThemeMode()),
-                    child: const Text('Toggle'),
+                    onPressed: () => bloc.add(const ToggleThemeMode()),
+                    child: Text(l.toggle),
                   ),
                 ],
               ),

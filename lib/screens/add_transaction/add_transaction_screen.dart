@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../models/transaction.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../l10n/category_localizations.dart';
+import '../../shared/widgets/category_icon.dart';
 import '../../shared/widgets/type_segmented_button.dart';
 import '../category_selection/category_selection_screen.dart';
 
@@ -58,22 +61,26 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   void _save() {
-    final amount = parsePositiveMinorUnits(_draft.amountText);
+    final l = AppLocalizations.of(context)!;
+    final amount = parsePositiveMinorUnits(
+      _draft.amountText,
+      Localizations.localeOf(context),
+    );
     if (amount == null) {
       setState(() {
-        _amountError = 'Enter an amount greater than zero.';
+        _amountError = l.enterAmountError;
       });
       return;
     }
     if (_draft.category == null) {
       setState(() {
-        _amountError = 'Select a category.';
+        _amountError = l.selectCategoryError;
       });
       return;
     }
     if (_draft.category!.type != _draft.type) {
       setState(() {
-        _amountError = 'Category type does not match transaction type.';
+        _amountError = l.categoryTypeError;
       });
       return;
     }
@@ -83,28 +90,35 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final amountIsValid = parsePositiveMinorUnits(_draft.amountText) != null;
+    final l = AppLocalizations.of(context)!;
+    final isVnd = Localizations.localeOf(context).languageCode == 'vi';
+    final amountIsValid =
+        parsePositiveMinorUnits(
+          _draft.amountText,
+          Localizations.localeOf(context),
+        ) !=
+        null;
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         leading: IconButton(
-          tooltip: 'Back',
+          tooltip: l.back,
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.arrow_back),
         ),
-        title: const Text('Add Transaction'),
+        title: Text(l.navAddTransaction),
         actions: [
           TextButton(
             onPressed: amountIsValid && _draft.category != null ? _save : null,
-            child: const Text('Save'),
+            child: Text(l.save),
           ),
         ],
       ),
       body: Semantics(
         container: true,
-        label: 'Add transaction form',
+        label: l.addTransactionForm,
         child: Padding(
           padding: EdgeInsets.fromLTRB(20, 12, 20, bottomInset + 16),
           child: SingleChildScrollView(
@@ -130,14 +144,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   onTapOutside: (event) =>
                       FocusManager.instance.primaryFocus?.unfocus(),
                   autofocus: true,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
+                  keyboardType: TextInputType.numberWithOptions(
+                    decimal: !isVnd,
                   ),
                   textInputAction: TextInputAction.done,
                   decoration: InputDecoration(
-                    labelText: 'Amount',
-                    hintText: '0.00',
-                    prefixText: r'$ ',
+                    labelText: l.amount,
+                    hintText: isVnd ? l.amountHintVnd : l.amountHintUsd,
+                    prefixText: isVnd ? null : r'$ ',
+                    suffixText: isVnd ? ' ₫' : null,
                     errorText: _amountError,
                     border: const OutlineInputBorder(),
                   ),
@@ -156,11 +171,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 const SizedBox(height: 16),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: Icon(
-                    _draft.category?.icon ?? Icons.category_outlined,
+                  leading: CategoryIcon(
+                    icon: _draft.category?.icon ?? Icons.category_outlined,
+                    iconAssetPath: _draft.category?.iconAssetPath,
                   ),
                   title: Text(
-                    _draft.category?.label ?? 'Select Category',
+                    _draft.category == null
+                        ? l.selectCategory
+                        : localizedCategoryLabel(l, _draft.category!),
                     style: theme.textTheme.titleMedium,
                   ),
                   trailing: const Icon(Icons.chevron_right),
@@ -185,7 +203,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.event_outlined),
-                  title: const Text('Date and time'),
+                  title: Text(l.dateTime),
                   subtitle: Text(_formatDraftDateTime(_draft.createdAt)),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: _selectDateTime,
@@ -193,12 +211,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 const Divider(),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('More Details'),
+                  title: Text(l.moreDetails),
                   subtitle: Text(
                     _draft.eventContext == null ||
-                            _draft.eventContext == 'No event'
-                        ? 'Add an event or campaign'
-                        : _draft.eventContext!,
+                            _draft.eventContext == transactionEvents.first
+                        ? l.addEvent
+                        : _localizedEventLabel(l, _draft.eventContext!),
                   ),
                   trailing: Icon(
                     _draft.isMoreDetailsExpanded
@@ -216,13 +234,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   DropdownButtonFormField<String>(
                     initialValue:
                         _draft.eventContext ?? transactionEvents.first,
-                    decoration: const InputDecoration(
-                      labelText: 'Event or campaign',
+                    decoration: InputDecoration(
+                      labelText: l.eventCampaign,
                       border: OutlineInputBorder(),
                     ),
                     items: [
                       for (final event in transactionEvents)
-                        DropdownMenuItem(value: event, child: Text(event)),
+                        DropdownMenuItem(
+                          value: event,
+                          child: Text(_localizedEventLabel(l, event)),
+                        ),
                     ],
                     onChanged: (event) {
                       setState(() => _draft.eventContext = event);
@@ -232,7 +253,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 FilledButton.icon(
                   onPressed: amountIsValid ? _save : null,
                   icon: const Icon(Icons.check),
-                  label: const Text('Save'),
+                  label: Text(l.save),
                 ),
               ],
             ),
@@ -249,3 +270,12 @@ String _formatDraftDateTime(DateTime dateTime) {
   final minute = local.minute.toString().padLeft(2, '0');
   return '${local.day}/${local.month}/${local.year} at $hour:$minute';
 }
+
+String _localizedEventLabel(AppLocalizations l, String event) =>
+    switch (event) {
+      'No event' => l.noEvent,
+      'Holiday spending' => l.holidaySpending,
+      'Home renovation' => l.homeRenovation,
+      'Birthday celebration' => l.birthdayCelebration,
+      _ => event,
+    };

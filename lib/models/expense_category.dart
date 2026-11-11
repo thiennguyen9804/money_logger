@@ -13,6 +13,7 @@ class ExpenseCategory extends Category {
     required super.id,
     required super.label,
     required super.icon,
+    super.iconAssetPath,
   }) : super(type: TransactionType.expense);
 
   // Static list of all 18 predefined expense categories
@@ -42,6 +43,7 @@ class ExpenseCategory extends Category {
     id: 'expense-fuel',
     label: 'Fuel',
     icon: Icons.local_gas_station,
+    iconAssetPath: 'assets/icons/fuel.svg',
   );
 
   static final transportation = ExpenseCategory(

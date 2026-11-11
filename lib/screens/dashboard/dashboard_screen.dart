@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../models/ledger.dart';
 import '../../models/transaction.dart';
+import '../../shared/formatters/currency_formatter.dart';
 import '../shell/destination_view_state.dart';
-import 'widgets/wallet_balance_card.dart';
 import 'widgets/recent_transaction_row.dart';
+import 'widgets/wallet_balance_card.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({
@@ -14,48 +16,43 @@ class DashboardScreen extends StatelessWidget {
     required this.onBalanceVisibilityChanged,
     super.key,
   });
-
   final DestinationViewState viewState;
   final DashboardSessionData dashboardSession;
   final ValueChanged<int> onDestinationSelected;
   final ValueChanged<BalanceVisibilityState> onBalanceVisibilityChanged;
-
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final wallet = dashboardSession.walletSummary;
-    final isVisible =
+    final visible =
         dashboardSession.balanceVisibility == BalanceVisibilityState.visible;
-    final formattedAmount = formatMinorCurrency(
-      amountMinorUnits: wallet.amountMinorUnits,
-      currencySymbol: wallet.currencySymbol,
+    final amount = CurrencyFormatter.formatMinorUnits(
+      wallet.amountMinorUnits,
+      Localizations.localeOf(context),
     );
-    final amountLabel = isVisible ? formattedAmount : 'Balance hidden';
-    final recentTransactions = deriveRecentTransactions(
-      dashboardSession.transactions,
-    );
-
+    final label = visible ? amount : l.balanceHidden;
+    final recent = deriveRecentTransactions(dashboardSession.transactions);
     return Scaffold(
-      appBar: AppBar(title: const Text('Dashboard')),
+      appBar: AppBar(title: Text(l.dashboard)),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final compact = constraints.maxWidth < 420;
-          final horizontalPadding = compact ? 16.0 : 24.0;
+          final padding = constraints.maxWidth < 420 ? 16.0 : 24.0;
           return ListView(
             key: const PageStorageKey<String>('dashboard'),
             controller: viewState.scrollController,
-            padding: EdgeInsets.all(horizontalPadding),
+            padding: EdgeInsets.all(padding),
             children: [
               Text(
-                'Dashboard',
+                l.dashboard,
                 style: Theme.of(context).textTheme.displaySmall,
               ),
               const SizedBox(height: 20),
               Semantics(
                 container: true,
-                label: 'Current Balance. $amountLabel.',
+                label: '${l.currentBalance}. $label.',
                 child: WalletBalanceCard(
-                  isVisible: isVisible,
-                  amount: formattedAmount,
+                  isVisible: visible,
+                  amount: amount,
                   onBalanceVisibilityChanged: onBalanceVisibilityChanged,
                 ),
               ),
@@ -66,30 +63,27 @@ class DashboardScreen extends StatelessWidget {
                 runSpacing: 4,
                 children: [
                   Text(
-                    'Recent Transactions',
+                    l.recentTransactions,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   TextButton(
                     onPressed: () => onDestinationSelected(1),
-                    child: const Text('View All'),
+                    child: Text(l.viewAll),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              if (recentTransactions.isEmpty)
-                const Card(
+              if (recent.isEmpty)
+                Card(
                   child: ListTile(
-                    leading: Icon(Icons.receipt_long_outlined),
-                    title: Text('No transactions yet'),
-                    subtitle: Text('Your recent activity will appear here.'),
+                    leading: const Icon(Icons.receipt_long_outlined),
+                    title: Text(l.noTransactions),
+                    subtitle: Text(l.recentActivityEmpty),
                   ),
                 )
               else
-                for (final transaction in recentTransactions)
-                  RecentTransactionRow(
-                    transaction: transaction,
-                    currencySymbol: wallet.currencySymbol,
-                  ),
+                for (final transaction in recent)
+                  RecentTransactionRow(transaction: transaction),
             ],
           );
         },

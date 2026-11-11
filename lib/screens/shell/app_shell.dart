@@ -25,11 +25,7 @@ class _AppShellState extends State<AppShell> {
   void initState() {
     super.initState();
     _dashboardSession = DashboardSessionData(
-      walletSummary: const WalletSummary(
-        amountMinorUnits: 245075,
-        currencyCode: 'USD',
-        currencySymbol: r'$',
-      ),
+      walletSummary: const WalletSummary(amountMinorUnits: 245075),
       transactions: [
         Transaction(
           id: 'coffee-shop',
@@ -159,7 +155,10 @@ class _AppShellState extends State<AppShell> {
       return;
     }
 
-    final amountMinorUnits = parsePositiveMinorUnits(draft.amountText);
+    final amountMinorUnits = parsePositiveMinorUnits(
+      draft.amountText,
+      Localizations.localeOf(context),
+    );
     if (amountMinorUnits == null || draft.category == null) {
       return;
     }

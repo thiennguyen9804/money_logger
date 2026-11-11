@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../models/transaction.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 class WalletBalanceCard extends StatelessWidget {
   const WalletBalanceCard({
@@ -18,6 +19,7 @@ class WalletBalanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
+    final l = AppLocalizations.of(context)!;
 
     return Card(
       color: Color.alphaBlend(
@@ -34,12 +36,12 @@ class WalletBalanceCard extends StatelessWidget {
               crossAxisAlignment: WrapCrossAlignment.center,
               runSpacing: 4,
               children: [
-                Text('Current Balance', style: theme.textTheme.titleMedium),
+                Text(l.currentBalance, style: theme.textTheme.titleMedium),
                 Semantics(
                   button: true,
-                  label: isVisible ? 'Hide balance' : 'Show balance',
+                  label: isVisible ? l.hideBalance : l.showBalance,
                   child: IconButton(
-                    tooltip: isVisible ? 'Hide balance' : 'Show balance',
+                    tooltip: isVisible ? l.hideBalance : l.showBalance,
                     onPressed: () {
                       onBalanceVisibilityChanged(
                         isVisible
@@ -71,10 +73,7 @@ class WalletBalanceCard extends StatelessWidget {
               ),
             ),
             if (!isVisible)
-              Text(
-                'Tap the eye icon to show your balance.',
-                style: theme.textTheme.bodyMedium,
-              ),
+              Text(l.showBalance, style: theme.textTheme.bodyMedium),
           ],
         ),
       ),

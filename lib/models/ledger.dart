@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 import 'transaction.dart';
 
 class DashboardSessionData {
@@ -52,30 +54,6 @@ class TransactionDateGroup {
   final DateTime date;
   final List<Transaction> transactions;
   final int dailyNetTotalMinorUnits;
-}
-
-String formatMinorCurrency({
-  required int amountMinorUnits,
-  required String currencySymbol,
-}) {
-  final sign = amountMinorUnits < 0 ? '-' : '';
-  final absoluteAmount = amountMinorUnits.abs();
-  final wholePart = absoluteAmount ~/ 100;
-  final fractionPart = (absoluteAmount % 100).toString().padLeft(2, '0');
-  final wholeDigits = wholePart.toString();
-  final groupedWhole = _groupDigits(wholeDigits);
-
-  return '$sign$currencySymbol$groupedWhole.$fractionPart';
-}
-
-String _groupDigits(String digits) {
-  final firstGroupLength = digits.length % 3 == 0 ? 3 : digits.length % 3;
-  final groups = <String>[
-    digits.substring(0, firstGroupLength),
-    for (var index = firstGroupLength; index < digits.length; index += 3)
-      digits.substring(index, index + 3),
-  ];
-  return groups.join(',');
 }
 
 List<LedgerMonth> deriveLedgerMonths(List<Transaction> transactions) {
@@ -177,56 +155,14 @@ List<Transaction> deriveRecentTransactions(List<Transaction> transactions) {
   return List.unmodifiable(sortedTransactions.take(3));
 }
 
-String formatLedgerMonth(LedgerMonth month) {
-  const monthNames = <String>[
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-  return '${monthNames[month.month - 1]} ${month.year}';
+String formatLedgerMonth(LedgerMonth month, [String locale = 'en_US']) {
+  return DateFormat.yMMMM(locale).format(DateTime(month.year, month.month));
 }
 
-String formatLedgerDate(DateTime date) {
-  const monthNames = <String>[
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  return '${monthNames[date.month - 1]} ${date.day}, ${date.year}';
+String formatLedgerDate(DateTime date, [String locale = 'en_US']) {
+  return DateFormat.yMMMd(locale).format(date);
 }
 
-String formatTransactionDate(DateTime date) {
-  const monthNames = <String>[
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  return '${monthNames[date.month - 1]} ${date.day}, ${date.year}';
+String formatTransactionDate(DateTime date, [String locale = 'en_US']) {
+  return DateFormat.yMMMd(locale).format(date);
 }

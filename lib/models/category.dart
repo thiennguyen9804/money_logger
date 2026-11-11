@@ -12,6 +12,7 @@ abstract class Category {
     required this.id,
     required this.label,
     required this.icon,
+    this.iconAssetPath,
     required this.type,
   });
 
@@ -23,6 +24,9 @@ abstract class Category {
 
   /// Material Icon to display for this category.
   final IconData icon;
+
+  /// Optional path to bundled SVG artwork for this category.
+  final String? iconAssetPath;
 
   /// The transaction type this category belongs to.
   final TransactionType type;

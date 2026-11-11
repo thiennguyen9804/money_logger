@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 
 import '../../models/categories.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../l10n/category_localizations.dart';
+import '../../shared/widgets/category_icon.dart';
 
 class CategorySelectionScreen extends StatefulWidget {
   const CategorySelectionScreen({
@@ -29,6 +31,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final categories = _tabIndex == 0
         ? ExpenseCategory.values
         : IncomeCategory.values;
@@ -38,11 +41,11 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
       initialIndex: _tabIndex,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Select Category'),
+          title: Text(l.selectCategory),
           bottom: TabBar(
-            tabs: const [
-              Tab(text: 'Expense'),
-              Tab(text: 'Income'),
+            tabs: [
+              Tab(text: l.expense),
+              Tab(text: l.income),
             ],
             onTap: (index) => setState(() => _tabIndex = index),
           ),
@@ -59,12 +62,12 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'No categories available',
+                      l.noCategories,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'There are no categories for this type',
+                      l.noCategoriesType,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -89,8 +92,11 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                           ? Theme.of(context).colorScheme.secondaryContainer
                           : null,
                       child: ListTile(
-                        leading: Icon(category.icon),
-                        title: Text(category.label),
+                        leading: CategoryIcon(
+                          icon: category.icon,
+                          iconAssetPath: category.iconAssetPath,
+                        ),
+                        title: Text(localizedCategoryLabel(l, category)),
                         trailing: selected ? const Icon(Icons.check) : null,
                         onTap: () => Navigator.of(context).pop(category),
                       ),

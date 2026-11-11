@@ -1,24 +1,22 @@
 import 'package:flutter/material.dart';
 
 import '../../../models/ledger.dart';
+import '../../../l10n/generated/app_localizations.dart';
+import '../../../shared/formatters/currency_formatter.dart';
 import 'ledger_transaction_row.dart';
 
 class TransactionDateGroupView extends StatelessWidget {
-  const TransactionDateGroupView({
-    required this.group,
-    required this.currencySymbol,
-    super.key,
-  });
+  const TransactionDateGroupView({required this.group, super.key});
 
   final TransactionDateGroup group;
-  final String currencySymbol;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final total = formatMinorCurrency(
-      amountMinorUnits: group.dailyNetTotalMinorUnits,
-      currencySymbol: currencySymbol,
+    final l = AppLocalizations.of(context)!;
+    final total = CurrencyFormatter.formatMinorUnits(
+      group.dailyNetTotalMinorUnits,
+      Localizations.localeOf(context),
     );
     final totalColor = group.dailyNetTotalMinorUnits > 0
         ? colorScheme.primary
@@ -38,12 +36,15 @@ class TransactionDateGroupView extends StatelessWidget {
               runSpacing: 4,
               children: [
                 Text(
-                  formatLedgerDate(group.date),
+                  formatLedgerDate(
+                    group.date,
+                    Localizations.localeOf(context).toString(),
+                  ),
                   style: Theme.of(context).textTheme.titleMedium
                       ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  'Daily total: $total',
+                  l.dailyTotal(total),
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: totalColor,
                     fontWeight: FontWeight.bold,
@@ -53,10 +54,7 @@ class TransactionDateGroupView extends StatelessWidget {
             ),
           ),
           for (final transaction in group.transactions)
-            LedgerTransactionRow(
-              transaction: transaction,
-              currencySymbol: currencySymbol,
-            ),
+            LedgerTransactionRow(transaction: transaction),
         ],
       ),
     );

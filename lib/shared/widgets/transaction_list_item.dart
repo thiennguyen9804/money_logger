@@ -1,45 +1,41 @@
 import 'package:flutter/material.dart';
 
-import '../../models/ledger.dart';
+import '../formatters/currency_formatter.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../models/transaction.dart';
+import 'category_icon.dart';
 
 class TransactionListItem extends StatelessWidget {
   const TransactionListItem({
     required this.transaction,
-    required this.currencySymbol,
+
     required this.secondaryText,
     super.key,
   });
 
   final Transaction transaction;
-  final String currencySymbol;
+
   final String secondaryText;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l = AppLocalizations.of(context)!;
     final colorScheme = theme.colorScheme;
     final amountColor = transaction.amountMinorUnits == 0
         ? colorScheme.onSurfaceVariant
         : transaction.type == TransactionType.income
         ? colorScheme.primary
         : colorScheme.error;
-    final amount = formatMinorCurrency(
-      amountMinorUnits: transaction.amountMinorUnits,
-      currencySymbol: currencySymbol,
+    final amount = CurrencyFormatter.formatMinorUnits(
+      transaction.amountMinorUnits,
+      Localizations.localeOf(context),
     );
     final typeLabel = transaction.amountMinorUnits == 0
-        ? 'Neutral'
+        ? l.neutral
         : transaction.type == TransactionType.income
-        ? 'Income'
-        : 'Expense';
-    // Use theme-aware color instead of category-specific color
-    // All categories use the same background with alpha blend
-    final categoryColor = Color.alphaBlend(
-      colorScheme.primary.withValues(alpha: 0.75),
-      colorScheme.surface,
-    );
-
+        ? l.income
+        : l.expense;
     return Semantics(
       label: '${transaction.description}. $typeLabel. $amount.',
       child: Card(
@@ -48,10 +44,9 @@ class TransactionListItem extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CircleAvatar(
-                backgroundColor: categoryColor,
-                foregroundColor: colorScheme.onSurface,
-                child: Icon(transaction.category.icon),
+              CategoryIcon(
+                icon: transaction.category.icon,
+                iconAssetPath: transaction.category.iconAssetPath,
               ),
               const SizedBox(width: 12),
               Expanded(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/transaction.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 class TypeSegmentedButton extends StatelessWidget {
   const TypeSegmentedButton({
@@ -15,17 +16,18 @@ class TypeSegmentedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context)!;
     return SegmentedButton<TransactionType>(
-      segments: const [
+      segments: [
         ButtonSegment<TransactionType>(
           value: TransactionType.expense,
           icon: Icon(Icons.arrow_upward),
-          label: Text('Expense'),
+          label: Text(l.expense),
         ),
         ButtonSegment<TransactionType>(
           value: TransactionType.income,
           icon: Icon(Icons.arrow_downward),
-          label: Text('Income'),
+          label: Text(l.income),
         ),
       ],
       selected: {selectedType},

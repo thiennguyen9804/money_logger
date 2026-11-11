@@ -30,9 +30,17 @@ class LedgerMonthSelector extends StatelessWidget {
           return Semantics(
             button: true,
             selected: selected,
-            label: formatLedgerMonth(month),
+            label: formatLedgerMonth(
+              month,
+              Localizations.localeOf(context).toString(),
+            ),
             child: ChoiceChip(
-              label: Text(formatLedgerMonth(month)),
+              label: Text(
+                formatLedgerMonth(
+                  month,
+                  Localizations.localeOf(context).toString(),
+                ),
+              ),
               selected: selected,
               onSelected: (_) => onMonthSelected(month),
               selectedColor: colorScheme.primaryContainer,

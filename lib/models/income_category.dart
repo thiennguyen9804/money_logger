@@ -13,6 +13,7 @@ class IncomeCategory extends Category {
     required super.id,
     required super.label,
     required super.icon,
+    super.iconAssetPath,
   }) : super(type: TransactionType.income);
 
   // Static list of all 6 predefined income categories
@@ -30,12 +31,14 @@ class IncomeCategory extends Category {
     id: 'income-transfer-in',
     label: 'Transfer In',
     icon: Icons.compare_arrows,
+    iconAssetPath: 'assets/icons/payment_arrow_down.svg',
   );
 
   static final salary = IncomeCategory(
     id: 'income-salary',
     label: 'Salary',
     icon: Icons.work,
+    iconAssetPath: 'assets/icons/salary.svg',
   );
 
   static final otherIncome = IncomeCategory(
